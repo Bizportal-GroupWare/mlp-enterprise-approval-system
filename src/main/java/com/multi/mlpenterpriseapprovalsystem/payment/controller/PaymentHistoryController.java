@@ -33,6 +33,7 @@ public class PaymentHistoryController {
 
     private final PaymentHistoryService paymentHistoryService;
 
+    // 내 회사의 결제 내역 조회
     @GetMapping("/payment-historys")
     public ResponseEntity<ResponseDto<Page<ResPaymentHistoryDto>>> getMyPaymentHistory(
             @AuthenticationPrincipal CustomUser customUser,

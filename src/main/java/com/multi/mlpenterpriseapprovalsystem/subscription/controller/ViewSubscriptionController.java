@@ -14,11 +14,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class ViewSubscriptionController {
 
+    // 요금제 목록 화면 반환
     @GetMapping("/subscriptions")
     public String viewSubscriptions() {
         return "subscription/list";
     }
 
+    // 요금제 소개 화면 반환
     @GetMapping("/subscriptions/intro")
     public String viewSubscriptionsIntro() {
         return "subscription/intro";

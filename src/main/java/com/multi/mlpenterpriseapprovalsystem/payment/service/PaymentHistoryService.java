@@ -27,6 +27,7 @@ public class PaymentHistoryService {
 
     private final PaymentHistoryRepository paymentHistoryRepository;
 
+    // 회사별 결제 내역을 최신순으로 조회
     public Page<ResPaymentHistoryDto> getPaymentHistories(String comId, Pageable pageable) {
         Page<PaymentHistory> historyPage = paymentHistoryRepository.findByCompany_ComIdOrderByCreatedAtDesc(comId, pageable);
 

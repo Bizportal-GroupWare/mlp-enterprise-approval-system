@@ -27,7 +27,6 @@ public class PaymentMethod extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY) 
     @JoinColumn(name = "com_id", referencedColumnName = "com_id") 
     private Company company;
-    
 
     @Enumerated(EnumType.STRING)
     private PaymType paymType;

@@ -83,30 +83,6 @@ public class ViewDocumentController {
     }
 
     // 문서 상세 조회 화면
-//    @GetMapping("/documents/{docNo}")
-//    public String viewDocumentDetailByDocNo(@RequestParam(name = "status", defaultValue = "FINALIZED") String status,
-//                                            @RequestParam(name = "atteNo", required = false) Long atteNo)
-//    {
-//        if("UNSUBMITTED".equals(status)) { // 임시저장 문서 상세
-//            return "document/document-temp-rewrite";
-//        }
-//        else if("SUBMITTED".equals(status)){ // 상신한 문서 상세
-//            return "document/submitted-detail";
-//        }
-//        else if("AWAITING".equals(status)){ // 결재할 문서 상세
-//            return "document/awaiting-detail";
-//        }
-//        else if("PROCESSED".equals(status)){ // 결재한 문서 상세
-//            return "document/processed-detail";
-//        }
-//        else if("FINALIZED".equals(status)){ // 최종승인 문서 상세
-//            return "document/finalized-detail";
-//        }
-//        else{
-//            throw new CustomException(ErrorCode.INVALID_DOCUMENT_STATUS_REQUEST);
-//        }
-//    }
-
     @GetMapping("/documents/{docNo}")
     public String viewDocumentDetailByDocNo(
             @PathVariable(name = "docNo") Long docNo,

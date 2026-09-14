@@ -20,6 +20,7 @@ public class DocumentWebClientConfig {
     private final DocumentOpenAiConfig documentOpenAiConfig;
 
 
+    // 문서 AI 요청에 사용할 WebClient 빈 생성
     @Bean
     public WebClient documentOpenAiWebClient() {
         return WebClient.builder()

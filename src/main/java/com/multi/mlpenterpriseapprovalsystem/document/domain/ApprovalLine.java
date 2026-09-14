@@ -60,9 +60,7 @@ public class ApprovalLine extends BaseEntity {
     @JoinColumn(name = "target_emp_id", referencedColumnName = "emp_id", nullable = true)
     Employee targetApprover; // 권한 위임자. 누구를 대신해서 내가 여기 있는가
 
-    /**
-     * 실제 결재자가 아닌 경우 상태만 변경 (같은 seq의 다른 결재자/대직자)
-     */
+    // 실제 결재자가 아닌 경우 상태만 변경 (같은 seq의 다른 결재자/대직자)
     public void markAsNotActualApprover(ApprStat status, String rejReason) {
         this.apprStat = status;
         this.endedAt = LocalDateTime.now();
@@ -72,18 +70,14 @@ public class ApprovalLine extends BaseEntity {
         }
     }
 
-    /**
-     * 승인 처리
-     */
+    // 승인 처리
     public void approve() {
         this.apprStat = ApprStat.A;
         this.endedAt = LocalDateTime.now();
         this.isActualAppr = true;
     }
 
-    /**
-     * 반려 처리
-     */
+    // 반려 처리
     public void reject(String reason) {
         this.apprStat = ApprStat.R;
         this.endedAt = LocalDateTime.now();
@@ -91,13 +85,12 @@ public class ApprovalLine extends BaseEntity {
         this.isActualAppr = true;
     }
 
-    /**
-     * 결재 진행중으로 변경
-     */
+    // 결재 진행중으로 변경
     public void setInProgress() {
         this.apprStat = ApprStat.I;
     }
 
+    // 결재라인 엔티티 생성
     public static ApprovalLine toEntity(Document document,
                                         Employee approver,
                                         Company company,

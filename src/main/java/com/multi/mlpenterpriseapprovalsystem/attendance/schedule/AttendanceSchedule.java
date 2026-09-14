@@ -42,18 +42,20 @@ public class AttendanceSchedule {
     private final ApprovalLineRepository approvalLineRepository;
     private final NotificationService notificationService;
 
+    // 매일 근태 시작과 종료에 따른 대직 상태 갱신 실행
     @Scheduled(cron = "0 3 0 * * *", zone = "Asia/Seoul")
     public void updateEmployeeDelegates() {
         updateDelegatesSchedule();
     }
 
+    // 당일 시작/종료 근태를 기준으로 사원 상태와 대직 결재라인 처리
     public void updateDelegatesSchedule() {
         LocalDate today = LocalDate.now();
         LocalDate yesterday = today.minusDays(1);
 
         List<Attendance> attendances = attendanceRepository.findByStartAtIsTodayOrEndAtIsYesterdayAndIsDeletedFalse(today, yesterday);
 
-        // [Step 1] 어제 근태가 끝난 사원들 복귀 처리
+        // 1. 어제 근태가 끝난 사원들 복귀 처리
         for (Attendance attendance : attendances) {
             if (attendance.getEndAt().toLocalDate().isEqual(yesterday)) {
                 Employee onLeave = attendance.getEmployee();
@@ -63,7 +65,7 @@ public class AttendanceSchedule {
                 onLeave.updateDelegate(null);
                 onLeave.updateAtteStatus("C");
 
-                // [알림] 대직 종료 알림
+                // 대직 종료 알림
                 if (delegate != null) {
                     notificationService.sendNotification(
                             delegate,
@@ -79,7 +81,7 @@ public class AttendanceSchedule {
             }
         }
 
-        // [Step 2] 오늘 근태가 시작되는 사원들의 "상태값" 먼저 모두 변경
+        // 2. 오늘 근태가 시작되는 사원들의 "상태값" 먼저 모두 변경
         for (Attendance attendance : attendances) {
             if (attendance.getStartAt().toLocalDate().isEqual(today)) {
                 Employee onLeave = attendance.getEmployee();
@@ -92,7 +94,7 @@ public class AttendanceSchedule {
             }
         }
 
-        // [Step 3] 결재라인 대직자 투입 실행
+        // 3. 결재라인 대직자 투입 실행
         for (Attendance attendance : attendances) {
             if (attendance.getStartAt().toLocalDate().isEqual(today) && attendance.getType() == AtteType.V) {
 
@@ -102,7 +104,7 @@ public class AttendanceSchedule {
                 if (delegate != null) {
                     addDelegateToApprovalLines(onLeave, delegate);
 
-                    // [알림] 오늘부터 대직 업무 시작 알림
+                    // 오늘부터 대직 업무 시작 알림
                     notificationService.sendNotification(
                             delegate,
                             NotificationType.OTHER,
@@ -117,6 +119,7 @@ public class AttendanceSchedule {
         }
     }
 
+    // 휴가자의 진행 중 결재라인에 대직자 결재라인 추가
     public void addDelegateToApprovalLines(Employee onLeave, Employee firstDelegate) {
         DocStat[] docStats = {DocStat.AW, DocStat.US};
         ApprStat[] apprStats = {ApprStat.I, ApprStat.W};
@@ -172,6 +175,7 @@ public class AttendanceSchedule {
         }
     }
 
+    // 휴가 종료 시 대직자 결재라인 제거
     public void removeDelegateFromApprovalLines(Employee onLeave, Employee delegate) {
         DocStat[] docStats = {DocStat.AW, DocStat.US};
         ApprStat[] apprStats = {ApprStat.I, ApprStat.W};

@@ -26,34 +26,11 @@ public interface ApprovalLineRepository extends JpaRepository<ApprovalLine, Long
     @Modifying
     void deleteByDocument_docNo(Long docNo);
 
-
-    /**
-     * 휴가 종료 시 대직자 결재라인 삭제 (2단계 방식)
-     * Step 1: 삭제할 결재라인 ID 조회
-     */
-//    @Query("SELECT al.apprlNo FROM ApprovalLine al " +
-//            "WHERE al.isDelegate = true " +
-//            "AND al.approver = :delegate " +
-//            "AND al.apprStat IN (:apprStats) " +
-//            "AND al.document.docStat IN (:docStats) " +
-//            "AND EXISTS (" +
-//            "    SELECT 1 FROM ApprovalLine al2 " +
-//            "    WHERE al2.document = al.document " +
-//            "    AND al2.seq = al.seq " +
-//            "    AND al2.isDelegate = false " +
-//            "    AND al2.approver = :onLeave" +
-//            ")")
-//    List<Long> findDelegateApprovalLineIdsToDelete(
-//            @Param("onLeave") Employee onLeave,
-//            @Param("delegate") Employee delegate,
-//            @Param("docStats") DocStat[] docStats,
-//            @Param("apprStats") ApprStat[] apprStats
-//    );
-
+    // 휴가 종료 시 삭제할 대직자 결재라인 ID 조회(주석 내용 체크 필요)
     @Query("SELECT al.apprlNo FROM ApprovalLine al " +
             "WHERE al.isDelegate = true " +
             "AND al.approver = :delegate " +
-            "AND al.targetApprover = :onLeave " + // ◀ seq를 일일이 대조할 필요 없이 직접 관계 확인 가능
+            "AND al.targetApprover = :onLeave " + // 대직 대상자 직접 확인
             "AND al.apprStat IN (:apprStats) " +
             "AND al.document.docStat IN (:docStats)")
     List<Long> findDelegateApprovalLineIdsToDelete(
@@ -63,9 +40,7 @@ public interface ApprovalLineRepository extends JpaRepository<ApprovalLine, Long
             @Param("apprStats") ApprStat[] apprStats
     );
 
-    /**
-     * 결재라인 ID 목록으로 삭제 (Step 2)
-     */
+    // 결재라인 ID 목록으로 삭제
     @Modifying
     @Query("DELETE FROM ApprovalLine al WHERE al.apprlNo IN :apprlNos")
     void deleteByApprlNoIn(@Param("apprlNos") List<Long> apprlNos);
@@ -85,15 +60,6 @@ public interface ApprovalLineRepository extends JpaRepository<ApprovalLine, Long
             @Param("docStats") DocStat[] docStats,
             @Param("apprStats") ApprStat[] apprStats
     );
-
-    //
-//    boolean existsByDocumentAndSeqAndApproverAndIsDelegate(
-//            Document document,
-//            int seq,
-//            Employee approver,
-//            Boolean isDelegate
-//    );
-
 
     boolean existsByDocumentAndSeqAndApproverAndIsDelegateAndTargetApprover(
             Document document,

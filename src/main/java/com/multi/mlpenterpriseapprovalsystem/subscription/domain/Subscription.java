@@ -11,9 +11,9 @@ import java.math.BigDecimal;
 /**
  * 요금제 엔티티
  *
- * @filename    : Subscription
- * @author      : 김승기
- * @since       : 2025. 12. 16. 화요일
+ * @filename : Subscription
+ * @author : 이지헌
+ * @since : 2025. 12. 16. 화요일
  */
 @Entity
 @Getter

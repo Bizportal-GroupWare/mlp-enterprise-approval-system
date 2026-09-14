@@ -69,26 +69,24 @@ public class Attendance extends BaseEntity {
     @Builder.Default
     private boolean isDeleted = false;
 
+    // 근태 소프트 삭제
     public void softDelete() {
         this.isDeleted = true;
     }
 
+    // 근태에 영향을 준 최신 문서 갱신
     public void updateRecentDocument(Document document) {
         this.document = document;
     }
 
-    /**
-     * 근태 날짜 수정
-     */
+    // 근태 날짜 수정
     public void modifyDates(LocalDateTime newStartAt, LocalDateTime newEndAt, int newDays) {
         this.startAt = newStartAt;
         this.endAt = newEndAt;
         this.day = newDays;
     }
 
-    /**
-     * 대직자 수정
-     */
+    // 대직자 수정
     public void updateDelegate(Employee newDelegate) {
         this.delegate = newDelegate;
     }

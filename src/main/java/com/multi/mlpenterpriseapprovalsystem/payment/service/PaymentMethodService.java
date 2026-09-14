@@ -23,9 +23,9 @@ import java.util.stream.Collectors;
 /**
  * 결제수단 관리 서비스
  * 
- * @filename    : PaymentService
- * @author      : 이지헌
- * @since       : 25. 12. 17. 수요일
+ * @filename : PaymentService
+ * @author : 이지헌
+ * @since : 25. 12. 17. 수요일
  */
 
 @Service
@@ -40,9 +40,7 @@ public class PaymentMethodService {
     private final CompanySubscriptionRepository companySubscriptionRepository;
 
 
-    /**
-     * 회사의 모든 활성 결제 수단 조회
-     */
+    // 회사의 모든 활성 결제 수단 조회
     @Transactional(readOnly = true)
     public List<ResPaymentMethodDto> getPaymentMethods(String comId) {
         // 회사 및 구독 정보 조회 (대표 카드를 알기 위함)
@@ -166,7 +164,7 @@ public class PaymentMethodService {
 
         // 소프트 삭제 처리
         // 실제 DB에서 행을 지우지 않고 상태만 변경합니다.
-        targetCard.deactivate(); // PaymentMethod 엔티티에 active = false 메서드 추가 필요
+        targetCard.deactivate(); // PaymentMethod 엔티티에 active = false 메서드 호출
         log.info("[소프트 삭제 완료] 카드ID: {}", paymNo);
     }
 }
