@@ -33,16 +33,13 @@ public class Document extends BaseEntity {
     @Column(name = "doc_no")
     private Long docNo;
 
-    // 회사 참조 (com_id -> company.com_id)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "com_id", referencedColumnName = "com_id", nullable = false)
     private Company company;
 
-    // 문서 ID (UK 설정 권장)
     @Column(name = "doc_id", length = 14, unique = true)
     private String docId;
 
-    // 카테고리 참조 (docfo_cat_no)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "docfo_cat_no")
     private DocumentFormCategory documentFormCategory;
@@ -60,7 +57,6 @@ public class Document extends BaseEntity {
     @Column(name = "cntt_html", columnDefinition = "mediumtext")
     private String cnttHtml = "";
 
-    // 작성자 참조 (emp_id -> employee.emp_id)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "emp_id", referencedColumnName = "emp_id", nullable = false)
     private Employee writer;
@@ -120,9 +116,7 @@ public class Document extends BaseEntity {
         newDocument.resubmittedBy = this;      // 새 문서 → 반려된 문서(this) 참조
     }
 
-    /**
-     * 문서 내용 수정 (임시저장 문서용)
-     */
+    // 문서 내용 수정 (임시저장 문서용)
     public void update(String title, String content, String cnttHtml, String aiSumm, DocumentFormCategory category) {
         this.title = title;
         this.content = content;
@@ -141,31 +135,30 @@ public class Document extends BaseEntity {
         this.docStat = DocStat.FI;
     }
 
-    /**
-     * 반려
-     */
+    // 반려 처리
     public void reject() {
         this.docStat = DocStat.RJ;
     }
 
+    // 상신 취소 후 임시저장 상태로 되돌림
     public void cancelSubmit() {
         this.submittedAt = null;
         this.temp = true;
         this.docStat = DocStat.US;
     }
 
-    // Document 엔티티에 추가
+    // 문서 상신
     public void submit() {
         this.temp = false;
         this.submittedAt = LocalDateTime.now();
         this.docStat = DocStat.AW;
     }
 
-    // 임시저장용
+    // 임시저장
     public void saveAsTemp() {
         this.temp = true;
         this.submittedAt = null;
-        this.docStat = DocStat.US; // 또는 별도 상태가 있다면 변경
+        this.docStat = DocStat.US;
     }
 
     // 최종승인 시 문서코드 발행
