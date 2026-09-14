@@ -59,9 +59,7 @@ public class CompanySubscription extends BaseEntity {
     @Builder.Default
     private BigDecimal creditBalance = BigDecimal.ZERO; // 예치금
 
-    /**
-     * 변경 예약 또는 해지 예약을 취소하고 기존 상태로 복구
-     */
+    // 변경 예약 또는 해지 예약을 취소하고 기존 상태로 복구
     public void resumeSubscription() {
         // 상태가 FREE(완전 종료)인 경우에는 복구가 불가능하므로 서비스 레이어에서 체크 필요
         this.status = SubStatus.ACTIVE;
@@ -96,7 +94,7 @@ public class CompanySubscription extends BaseEntity {
         this.paymentMethod = newMethod;
     }
 
-    // 구독 해지 예약 로직 (제미나이 방식의 핵심)
+    // 구독 해지 예약 로직 (만료일 기준 처리)
     public void cancelSubscription() {
         this.autoRenewal = false;
         this.status = SubStatus.CANCELED;
@@ -110,7 +108,7 @@ public class CompanySubscription extends BaseEntity {
         this.autoRenewal = true;
     }
 
-    // 유료 권한이 있는지 확인 (Null Safety 추가)
+    // 유료 권한이 있는지 확인 (null 안전성 포함)
     public boolean hasProAccess() {
         if (this.status == SubStatus.ACTIVE) return true;
 
@@ -129,10 +127,12 @@ public class CompanySubscription extends BaseEntity {
         // 결제 수단(paymentMethod)은 유지할 수도, 지울 수도 있음 (다음 결제를 위해 유지 추천)
     }
 
+    // 현재 구독 요금제 변경
     public void updatePlan(Subscription plan) {
         this.subscription = plan;
     }
 
+    // 회사 구독 엔티티 생성
     public static CompanySubscription toEntity(Company company,
                                         Subscription plan,
                                         PaymentMethod paymentMethod,
