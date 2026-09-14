@@ -115,6 +115,7 @@ public class PortoneService {
         return dto;
     }
 
+    // 요금제 변경 요청을 처리하고 필요 시 즉시 결제
     public ResSubscriptionResultDto subscribeProPlan(String comId, Long subNo) {
         CompanySubscription sub = companySubscriptionRepository.findByCompany_ComId(comId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SUBSCRIPTION_NOT_FOUND));
@@ -126,7 +127,7 @@ public class PortoneService {
             throw new CustomException(ErrorCode.ALREADY_PENDING_PLAN);
         }
 
-        // 2. [핵심] 계층(Level) 기반 업그레이드 판단
+        // 2. 계층(Level) 기반 업그레이드 판단
         int currentLevel = getPlanLevel(sub.getSubscription().getSubNo());
         int targetLevel = getPlanLevel(targetPlan.getSubNo());
 
@@ -154,7 +155,7 @@ public class PortoneService {
                 // 1일당 가치 계산 (소수점 2자리까지 유지하여 계산 정확도 확보)
                 BigDecimal dayValue = sub.getSubscription().getSubPrice().divide(new BigDecimal("30"), 2, RoundingMode.HALF_UP);
 
-                // [수정 포인트] 최종 적립 금액 계산 시 정수로 반올림(setScale(0)) 처리
+                // 최종 적립 금액 계산 시 정수로 반올림(setScale(0)) 처리
                 BigDecimal remainingValue = dayValue.multiply(new BigDecimal(remainingDays))
                         .setScale(0, RoundingMode.HALF_UP);
 
@@ -215,9 +216,7 @@ public class PortoneService {
         }
     }
 
-    /**
-     * 요금제 계층(Level) 매핑 헬퍼 메서드
-     */
+    // 요금제 계층(Level) 매핑 헬퍼 메서드
     private int getPlanLevel(Integer subNo) {
         return switch (subNo) {
             case 1 -> 1; // Basic30
@@ -236,7 +235,7 @@ public class PortoneService {
 
     // 포트원 정기 결제 API 호출
     public Map<String, Object> requestrecurrentPayment(String customerUid, BigDecimal amount, String merchantUid, String itemName) {
-        String accessToken = getPortoneAccessToken(); // 기존 토큰 발급 메서드 사용
+        String accessToken = getPortoneAccessToken(); // 액세스 토큰 발급
 
         // 포트원 비인증(빌링키) 결제 API: /subscribe/payments/again
         return webClient.post()
@@ -253,9 +252,7 @@ public class PortoneService {
                 .block();
     }
 
-    /**
-     * 구독 해지 예약 (자동 갱신 취소 및 무료 전환 예약)
-     */
+    // 구독 해지 예약 (자동 갱신 취소 및 무료 전환 예약)
     public void cancelSubscription(String comId) {
         // 1. 해당 회사의 구독 정보 조회
         CompanySubscription companySub = companySubscriptionRepository.findByCompany_ComId(comId)
@@ -280,9 +277,7 @@ public class PortoneService {
     }
 
 
-    /**
-     * 구독 유지 (변경 예약 취소 및 자동 갱신 재개)
-     */
+    // 구독 유지 (변경 예약 취소 및 자동 갱신 재개)
     public void resumeSubscription(String comId) {
         // 1. 구독 정보 조회
         CompanySubscription sub = companySubscriptionRepository.findByCompany_ComId(comId)
@@ -290,7 +285,7 @@ public class PortoneService {
 
         // 2. 복구 가능 상태 확인 (이미 ACTIVE이면서 예약이 없는 경우 제외)
         if (sub.getStatus() == SubStatus.ACTIVE && sub.getPendingSubscription() == null && sub.isAutoRenewal()) {
-            throw new CustomException(ErrorCode.ALREADY_ACTIVE_SUBSCRIPTION); // "이미 활성화된 구독입니다" (에러코드 정의 필요)
+            throw new CustomException(ErrorCode.ALREADY_ACTIVE_SUBSCRIPTION); // 이미 활성화된 구독
         }
 
         // 3. FREE 상태인 경우 복구 불가 (새로 결제해야 함)

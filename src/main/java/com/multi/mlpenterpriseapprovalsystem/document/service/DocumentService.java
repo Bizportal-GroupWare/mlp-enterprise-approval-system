@@ -63,6 +63,7 @@ public class DocumentService {
     private final NotificationService notificationService;
     private final SearchOutboxAppender searchOutboxAppender;
 
+    // 문서 서비스 의존성 주입 생성자
     public DocumentService(
             DocumentRepository documentRepository,
             ApprovalLineRepository approvalLineRepository,
@@ -392,7 +393,7 @@ public class DocumentService {
 
         documentRepository.save(document);
 
-        // 4. 상신 or 임시저장 시 결재라인 검증 후 생성
+        // 3. 상신 or 임시저장 시 결재라인 검증 후 생성
         if (reqDocumentDto.getApprovalLines() != null && !reqDocumentDto.getApprovalLines().isEmpty()) {
             validateApproverNotSelf(myEmpId, reqDocumentDto.getApprovalLines());
             validateApprovalLineOrder(reqDocumentDto.getApprovalLines());
@@ -408,9 +409,7 @@ public class DocumentService {
         return document.getDocNo();
     }
 
-    /**
-     * 결재라인에 본인(작성자)이 포함되어 있는지 검증
-     */
+    // 결재라인에 본인(작성자)이 포함되어 있는지 검증
     private void validateApproverNotSelf(String writerEmpId, List<ReqApprovalLineDto> lineDtos) {
         boolean hasSelf = lineDtos.stream()
                 .anyMatch(line -> writerEmpId.equals(line.getApproverId()));
@@ -454,6 +453,7 @@ public class DocumentService {
         }
     }
 
+    // 결재 순서에 따라 원 결재자와 대직자 결재라인 생성
     private void createApprovalLines(Document document, Company company, List<ReqApprovalLineDto> lineDtos, boolean isTemp) {
         List<ReqApprovalLineDto> sortedLines = lineDtos.stream()
                 .sorted(Comparator.comparingInt(ReqApprovalLineDto::getSeq))
@@ -469,7 +469,7 @@ public class DocumentService {
             ApprovalLine approverLine = ApprovalLine.toEntity(document, approver, company, lineDto.getSeq(), apprStat, false, null);
             approvalLineRepository.save(approverLine);
 
-            // 2. 대직자 체인 추적 (순환 참조 방지 로직 추가)
+            // 2. 대직자 체인 추적 (순환 참조 방지)
             Employee currentTarget = approver;
             Set<String> visitedEmpIds = new HashSet<>();
             visitedEmpIds.add(approver.getEmpId()); // 시작 결재자 기록
@@ -559,7 +559,7 @@ public class DocumentService {
             throw new CustomException(ErrorCode.NOT_MY_TURN_TO_APPROVE);
         }
 
-        // 6. 승인/반려 처리
+        // 5. 승인/반려 처리
         // 내 라인들 중 첫 번째의 seq를 기준으로 잡음 (모두 같은 seq임)
         int currentSeq = myLines.get(0).getSeq();
         String apprStat = reqDto.getApprStat();
@@ -928,7 +928,7 @@ public class DocumentService {
 
         // 4. 임시저장(상신 전) 상태인지 확인 (이미 상신된 문서는 삭제 불가)
         if (document.getDocStat() != DocStat.US || !Boolean.TRUE.equals(document.getTemp())) {
-            throw new CustomException(ErrorCode.CANNOT_DELETE_SUBMITTED_DOCUMENT); // 에러코드 추가 필요
+            throw new CustomException(ErrorCode.CANNOT_DELETE_SUBMITTED_DOCUMENT); // 상신된 문서는 삭제할 수 없음
         }
 
         if (document.getResubmittedBy() != null) {
@@ -972,6 +972,7 @@ public class DocumentService {
         }
     }
 
+    // 요청 상태와 사용자 권한을 기준으로 실제 상세 화면 상태 판별
     @Transactional(readOnly = true)
     public String determineActualStatus(String comId, String myEmpId, Long docNo, String requestedStatus) {
         Document doc = documentRepository.findByIdWithApprovalLines(comId, docNo)
@@ -989,7 +990,7 @@ public class DocumentService {
         boolean hasProcessedRole = myLines.stream().anyMatch(al -> al.getApprStat() == ApprStat.A || al.getApprStat() == ApprStat.R);
         DocStat docStat = doc.getDocStat();
 
-        // 3. [최우선] 사용자 의도 존중 (다중 역할이라도 요청한 상태가 유효하면 통과)
+        // 3. 최우선 사용자 의도 존중 (다중 역할이라도 요청한 상태가 유효하면 통과)
         if ("SUBMITTED".equals(requestedStatus) && isWriter && docStat != DocStat.US) return "SUBMITTED";
         if ("UNSUBMITTED".equals(requestedStatus) && isWriter && docStat == DocStat.US) return "UNSUBMITTED";
 
@@ -1000,7 +1001,7 @@ public class DocumentService {
 
         if ("FINALIZED".equals(requestedStatus) && docStat == DocStat.FI) return "FINALIZED";
 
-        // 4. [자동 리다이렉트] 의도가 불분명할 때 우선순위 가이드
+        // 4. 자동 리다이렉트 의도가 불분명할 때 우선순위 가이드
         // 현재 당장 결재해야 할 건(I, W)이 있다면 결재 페이지로 먼저 안내
         if (docStat == DocStat.AW && hasAwaitingRole) return "AWAITING";
         if (hasProcessedRole) return "PROCESSED";

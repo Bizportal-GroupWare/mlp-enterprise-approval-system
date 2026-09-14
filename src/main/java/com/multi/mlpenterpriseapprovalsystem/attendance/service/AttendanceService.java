@@ -46,6 +46,7 @@ public class AttendanceService {
     private final AttendanceSchedule attendanceSchedule;
     private final NotificationService notificationService;
 
+    // 근태 서비스 의존성 주입 생성자
     public AttendanceService(AttendanceRepository attendanceRepository,
                              EmployeeRepository employeeRepository,
                              @Qualifier("objectMapper") ObjectMapper objectMapper,
@@ -190,16 +191,12 @@ public class AttendanceService {
     }
 
     /*
-    * 근태 수정
-    * 원본 시작일이 과거: 시작일은 변경 불가, 종료일은 어제부터 미래까지 가능
-    * 원본 시작일이 오늘, 미래: 시작은 오늘부터 미래까지 가능, 종료일은 시작일부터 미래까지 가능
-    * 휴가: 기존 근태 수정 ->
-    *      결재중인 문서의 결재라인에서 휴가자와 같은 결재순서이며 결재상태가 결재중, 결재대기중인 기존 대직자 삭제 ->
-    *      휴가자의 기존 대직자를 새 대직자로 수정 ->
-    *      결재라인에 새 대직자 추가
-    *
-    * 출장: 기존 근태 수정
-    */
+     * 근태 수정
+     * 원본 시작일이 과거: 시작일은 변경 불가, 종료일은 어제부터 미래까지 가능
+     * 원본 시작일이 오늘 또는 미래: 시작일은 오늘부터 미래까지 가능, 종료일은 시작일부터 미래까지 가능
+     * 휴가: 기존 근태 수정 -> 대직자 결재라인 정리 -> 새 대직자 반영
+     * 출장: 기존 근태 수정
+     */
     private void modifyAttendance(Document document, AttendanceInfo info) {
         // targetAtteNo 검증
         if (info.getTargetAtteNo() == null) {
@@ -453,7 +450,7 @@ public class AttendanceService {
      * 예시 JSON:
      * {
      *   "type": "doc",
-     *   "content": [...],
+     *   "content": ...,
      *   "attendanceInfo": {
      *     "startDate": "2024-12-23",
      *     "endDate": "2024-12-25",
@@ -579,14 +576,6 @@ public class AttendanceService {
         }
     }
 
-
-    // 상호 대직 및 데드락 방지 통합 검증
-//    private void validateAttendanceIntegrity(Employee writer, LocalDateTime start, LocalDateTime end) {
-//        // 내가 누군가의 대직자로 활동해야 하는 기간과 겹치는지 체크 (역방향 체크)
-//        if (attendanceRepository.existsByDelegateAndDateOverlap(writer, start, end)) {
-//            throw new CustomException(ErrorCode.CANNOT_LEAVE_WHILE_ACTING_AS_DELEGATE);
-//        }
-//    }
 
     // 나를 대직자로 설정한 사람들의 근태 목록 조회
     @Transactional(readOnly = true)
