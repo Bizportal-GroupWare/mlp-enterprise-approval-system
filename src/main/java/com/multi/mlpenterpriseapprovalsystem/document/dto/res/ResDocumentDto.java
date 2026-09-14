@@ -54,6 +54,7 @@ public class ResDocumentDto {
     private Long resubmittedByDocNo;
 
 
+    // 문서 엔티티를 기본 응답 DTO로 변환
     public static ResDocumentDto toDto(Document document) {
         return ResDocumentDto.builder()
                 .docNo(document.getDocNo())
@@ -93,6 +94,7 @@ public class ResDocumentDto {
     }
 
 
+    // 사용자 결재 상태를 포함해 문서 응답 DTO로 변환
     public static ResDocumentDto toDto(Document document, String empId) {
         ResDocumentDto resDocumentDto = ResDocumentDto.builder()
                 .docNo(document.getDocNo())
@@ -130,7 +132,7 @@ public class ResDocumentDto {
                         document.getResubmittedBy().getDocNo() : null)
                 .build();
 
-        // 2. ✅ 나의 대표 결재 상태 결정 (다중 순번 대응)
+        // 2. 나의 대표 결재 상태 결정 (다중 순번 대응)
         if (empId != null && document.getApprovalLines() != null) {
             // 내 사번이 포함된 모든 결재 라인의 상태 추출
             List<ApprStat> myStats = document.getApprovalLines().stream()
@@ -156,8 +158,9 @@ public class ResDocumentDto {
         return resDocumentDto;
     }
 
+    // 화면 맥락에 맞는 사용자 결재 상태를 포함해 DTO로 변환
     public static ResDocumentDto toDto(Document document, String empId, String contextStatus) {
-        ResDocumentDto dto = toDto(document, empId); // 기존 기본 매핑 로직 호출 (빌더 부분)
+        ResDocumentDto dto = toDto(document, empId); // 기본 매핑 로직 호출
 
         if (empId != null && document.getApprovalLines() != null) {
             List<ApprStat> myStats = document.getApprovalLines().stream()
@@ -167,7 +170,7 @@ public class ResDocumentDto {
 
             ApprStat representativeStat = null;
 
-            // ✅ 상황에 따른 우선순위 결정
+            // 상황에 따른 우선순위 결정
             if ("PROCESSED".equals(contextStatus)) {
                 // 결재한 문서 목록에서는 승인(A)이나 반려(R)를 우선 표시
                 representativeStat = myStats.contains(ApprStat.R) ? ApprStat.R :

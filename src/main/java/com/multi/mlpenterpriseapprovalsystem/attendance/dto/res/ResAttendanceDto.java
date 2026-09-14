@@ -48,6 +48,7 @@ public class ResAttendanceDto {
     private LocalDateTime startAt; // 시작일
     private LocalDateTime endAt;   // 종료일
 
+    // 근태 엔티티를 응답 DTO로 변환
     public static ResAttendanceDto toDto(Attendance attendance) {
         if (attendance == null) return null;
 

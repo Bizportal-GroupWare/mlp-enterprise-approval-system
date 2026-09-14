@@ -22,6 +22,7 @@ public class ResDocumentFormDtoV2 {
     private String cnttHtml;
     private List<ResDocumentFormCategoryDtoV2> resDocumentFormCategoryDtoV2s;
 
+    // 문서양식 엔티티를 응답 DTO로 변환
     public static ResDocumentFormDtoV2 toDto(DocumentForm documentForm) {
         return ResDocumentFormDtoV2.builder()
                 .docfoNo(documentForm.getDocfoNo())

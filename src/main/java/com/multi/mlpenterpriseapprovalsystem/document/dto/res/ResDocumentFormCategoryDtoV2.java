@@ -17,6 +17,7 @@ public class ResDocumentFormCategoryDtoV2 {
     private Long docfoCatNo;
     private String docfoCatName;
 
+    // 문서양식 카테고리 엔티티를 응답 DTO로 변환
     public static ResDocumentFormCategoryDtoV2 toDto(DocumentFormCategory documentFormCategory) {
         return ResDocumentFormCategoryDtoV2.builder()
                 .docfoCatName(documentFormCategory.getName())
