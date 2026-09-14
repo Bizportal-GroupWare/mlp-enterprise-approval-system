@@ -35,6 +35,7 @@ public class CompanySubscriptionScheduler {
     private final PortoneService portoneService;
     private final SubscriptionRepository subscriptionRepository;
 
+    // 매일 갱신 대상 구독의 정기 결제 처리
     @Scheduled(cron = "0 0 2 * * *", zone = "Asia/Seoul")
     public void processSubscriptionBilling() {
         LocalDateTime now = LocalDateTime.now();
@@ -57,7 +58,7 @@ public class CompanySubscriptionScheduler {
                     sub.clearPendingPlan();
                 }
 
-                // --- [예치금 적용 로직] ---
+                // 예치금 적용 로직
                 BigDecimal monthlyPrice = targetPlan.getSubPrice();
                 // 실제 결제액 = 이번 달 요금 - 보유 예치금
                 BigDecimal finalAmount = monthlyPrice.subtract(sub.getCreditBalance()).max(BigDecimal.ZERO);
