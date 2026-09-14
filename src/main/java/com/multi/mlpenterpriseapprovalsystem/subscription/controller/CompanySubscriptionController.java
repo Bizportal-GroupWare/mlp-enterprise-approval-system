@@ -31,18 +31,14 @@ public class CompanySubscriptionController {
     private final PortoneService portoneService;
     private final CompanySubscriptionService companySubscriptionService;
 
-    /**
-     * 내 회사의 현재 구독 정보 조회
-     */
+    // 내 회사의 현재 구독 정보 조회
     @GetMapping("/subscriptions/me")
     public ResponseEntity<ResponseDto<ResCompanySubscriptionDto>> getMySubscription(@AuthenticationPrincipal CustomUser customUser) {
         ResCompanySubscriptionDto data = companySubscriptionService.getCurrentSubscription(customUser.getComId());
         return ResponseEntity.ok(new ResponseDto<>(HttpStatus.OK, "내 구독 정보 조회 성공", data));
     }
 
-    /**
-     * 요금제 구독 및 즉시 결제 요청
-     */
+    // 요금제 구독 및 즉시 결제 요청
     @PostMapping("/subscriptions/upgrade")
     public ResponseEntity<ResponseDto<ResSubscriptionResultDto>> upgradeSubscription(
             @AuthenticationPrincipal CustomUser customUser,
@@ -65,9 +61,7 @@ public class CompanySubscriptionController {
     }
 
 
-    /**
-     * 구독 해지 요청 (해지 예약)
-     */
+    // 구독 해지 요청 (해지 예약)
     @PatchMapping("/subscriptions/cancel")
     public ResponseEntity<ResponseDto<Void>> cancelSubscription(@AuthenticationPrincipal CustomUser customUser) {
 
@@ -79,9 +73,7 @@ public class CompanySubscriptionController {
                 .body(new ResponseDto<>(HttpStatus.OK, "구독 해지 예약이 완료되었습니다. 만료일까지는 유료 기능 이용이 가능합니다.", null));
     }
 
-    /**
-     * 요금제 변경 예약 취소 (기존 구독 유지)
-     */
+    // 요금제 변경 예약 취소 (기존 구독 유지)
     @PatchMapping("/subscriptions/resume")
     public ResponseEntity<ResponseDto<Void>> resumeSubscription(@AuthenticationPrincipal CustomUser customUser) {
         String comId = customUser.getComId();
@@ -92,6 +84,7 @@ public class CompanySubscriptionController {
                 .body(new ResponseDto<>(HttpStatus.OK, "요금제 변경 예약이 취소되었습니다. 기존 요금제가 유지됩니다.", null));
     }
 
+    // 내 회사의 예치금 잔액 조회
     @GetMapping("/credits")
     public ResponseEntity<ResponseDto<BigDecimal>> getCredit(@AuthenticationPrincipal CustomUser customUser) {
         BigDecimal balance = companySubscriptionService.getCreditBalance(customUser.getComId());
